@@ -51,7 +51,7 @@ gofred app create my-app --package my-app
 
 **Options:**
 - `path`: Path where to create the application (required, positional argument)
-- `--package, -n`: Package name for the application (default: "gofred-app")
+- `--package, -p`: Package name for the application (default: "gofred-app")
 
 **Example:**
 ```bash
