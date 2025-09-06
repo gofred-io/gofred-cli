@@ -12,15 +12,15 @@ import (
 	"github.com/gofred-io/gofred-cli/flags"
 )
 
+const (
+	defaultCDNURL = "https://cdn.gofred.io"
+)
+
 type IndexFile struct {
 	Version string `json:"version"`
 }
 
 func CheckForUpdates(verbose bool) {
-	var (
-		defaultCDNURL = os.Getenv("CDN_URL")
-	)
-
 	if flags.IsOffline() {
 		return
 	}

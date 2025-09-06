@@ -5,7 +5,6 @@ import (
 	"github.com/gofred-io/gofred-cli/flags"
 	"github.com/gofred-io/gofred-cli/update"
 	"github.com/gofred-io/gofred-cli/version"
-	"github.com/joho/godotenv"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +19,6 @@ var (
 )
 
 func init() {
-	godotenv.Load()
 	rootCmd.Flags().BoolVarP(flags.OfflineRef(), "offline", "o", false, "Run the application in offline mode")
 
 	app.Init(rootCmd)
