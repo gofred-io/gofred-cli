@@ -18,7 +18,7 @@ A powerful command-line tool for creating and running Go WebAssembly application
 Run the installation script:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gofred-io/gofred-cli/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/gofred-io/gofred-cli/refs/heads/master/install.sh | bash
 ```
 
 This script will:
