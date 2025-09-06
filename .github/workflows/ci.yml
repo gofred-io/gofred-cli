@@ -71,7 +71,7 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: gofred-binaries
+        name: dist
         path: dist/
 
   release:
@@ -95,46 +95,39 @@ jobs:
     - name: Create release archives
       run: |
         echo "Processing artifacts..."
+        echo "Current directory contents:"
+        ls -la
         
-        # The artifacts are already in dist/ from the build job
+        # Check if we have a dist directory (from build job)
         if [ -d "dist" ]; then
           echo "Found dist directory with binaries:"
           ls -la dist/
           
-          # Create tar.gz archives for each binary
-          cd dist
-          for binary in gofred-*; do
+          # Create tar.gz archives for each binary in the dist directory
+          for binary in dist/gofred-*; do
             if [ -f "$binary" ]; then
-              echo "Creating archive for: $binary"
-              tar -czf "${binary}.tar.gz" "$binary"
-              echo "Created: ${binary}.tar.gz"
+              filename=$(basename "$binary")
+              echo "Creating archive for: $filename"
+              tar -czf "dist/${filename}.tar.gz" -C dist "$filename"
+              echo "Created: dist/${filename}.tar.gz"
+              rm "$binary"
             fi
           done
-          cd ..
-        else
-          echo "No dist directory found, checking for individual artifacts..."
-          # Fallback: look for individual artifact files
-          for artifact in gofred-*; do
-            if [ -f "$artifact" ]; then
-              echo "Found file: $artifact"
-              tar -czf "${artifact}.tar.gz" "$artifact"
-              echo "Created: ${artifact}.tar.gz"
-            fi
-          done
-        fi
         
-        echo "Final release files:"
-        find . -name "gofred-*.tar.gz" -type f
+          echo "Final dist files:"
+          ls -la dist/
+          find . -name "gofred-*.tar.gz" -type f
+        fi
     
     - name: Check for release files
       run: |
-        # Check for tar.gz files in current directory
-        if [ -z "$(find . -name "gofred-*.tar.gz" -type f)" ]; then
-          echo "No release files found"
+        # Check for tar.gz files in dist directory
+        if [ ! -d "dist" ] || [ -z "$(ls -A dist/ 2>/dev/null)" ]; then
+          echo "No release files found in dist/"
           exit 1
         fi
         echo "Release files found:"
-        find . -name "gofred-*.tar.gz" -type f
+        ls -la dist/
     
     - name: Check GitHub permissions
       run: |
@@ -146,7 +139,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: gofred-*.tar.gz
+        files: dist/*.tar.gz
         generate_release_notes: true
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
