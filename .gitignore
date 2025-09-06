@@ -1,0 +1,44 @@
+# IDEs
+.idea
+.vscode
+
+# Go
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.development
+.env.test
+.env.production
+
+# Node
+node_modules
+
+# Yarn
+yarn.lock
+
+# Package Managers
+package-lock.json
+pnpm-lock.yaml
+bun.lockb
+
+# OS
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Build
+build
+dist
+
+# Web
+web
+
+# Test
+test
+
+# App
+gofred
