@@ -1,7 +1,10 @@
 package create
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -13,10 +16,12 @@ import (
 
 const (
 	defaultPkgName = "gofred-app"
+	defaultCDNURL  = "https://cdn.gofred.io"
 )
 
 var (
 	appPath string
+	offline bool
 	pkgName string
 )
 
@@ -31,6 +36,7 @@ var (
 func Init(parentCmd *cobra.Command) {
 	createCmd.Flags().StringVarP(&appPath, "path", "p", "", "Path to create the application")
 	createCmd.Flags().StringVarP(&pkgName, "package", "n", defaultPkgName, "Package name for the application")
+	createCmd.Flags().BoolVarP(&offline, "offline", "o", false, "Create the application offline (without internet connection)")
 	parentCmd.AddCommand(createCmd)
 }
 
@@ -46,25 +52,6 @@ func createApp(cmd *cobra.Command, args []string) {
 
 	fmt.Printf("Creating application in %s\n", appPath)
 
-	// Check if the path exists
-	// if _, err = os.Stat(appPath); !os.IsNotExist(err) {
-	// 	fmt.Printf("Path %s already exists\n", appPath)
-	// 	return
-	// }
-
-	// // Create the path
-	// if err := os.MkdirAll(appPath, 0755); err != nil {
-	// 	fmt.Printf("Failed to create path %s: %v\n", appPath, err)
-	// 	return
-	// }
-
-	// Create the main.go file
-	// fs, err = os.Create(filepath.Join(appPath, "main.go"))
-	// if err != nil {
-	// 	fmt.Printf("Failed to create main.go file: %v\n", err)
-	// 	return
-	// }
-
 	err = createVsCodeWorkspace()
 	if err != nil {
 		fmt.Printf("Failed to create .vscode workspace: %v\n", err)
@@ -77,13 +64,14 @@ func createApp(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	err = createWebFolder()
+	err = createWebFolder(offline)
 	if err != nil {
 		fmt.Printf("Failed to create web folder: %v\n", err)
 		return
 	}
 
 	fmt.Println("Application created successfully")
+	fmt.Println("Run `cd " + appPath + " && gofred app run` to start the application")
 }
 
 func createVsCodeWorkspace() error {
@@ -150,10 +138,9 @@ func createMainFile() error {
 	return nil
 }
 
-func createWebFolder() error {
+func createWebFolder(offline bool) error {
 	var (
-		err     error
-		content []byte
+		err error
 	)
 
 	// Create the web folder if it doesn't exist
@@ -164,6 +151,19 @@ func createWebFolder() error {
 			return err
 		}
 	}
+
+	if offline {
+		return createWebFolderOffline(folderPath)
+	}
+
+	return createWebFolderOnline(folderPath)
+}
+
+func createWebFolderOffline(folderPath string) error {
+	var (
+		err     error
+		content []byte
+	)
 
 	// Copy the web folder from the embed
 	embedWeb := embed.Web()
@@ -179,6 +179,43 @@ func createWebFolder() error {
 		}
 
 		err = os.WriteFile(filepath.Join(folderPath, file.Name()), content, 0644)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func createWebFolderOnline(folderPath string) error {
+	// Download index.json from the CDN
+	response, err := http.Get(fmt.Sprintf("%s/web/index.json", defaultCDNURL))
+	if err != nil {
+		return err
+	}
+	defer response.Body.Close()
+
+	// Parse the index.json file
+	var indexFile IndexFile
+	err = json.NewDecoder(response.Body).Decode(&indexFile)
+	if err != nil {
+		return err
+	}
+
+	// Download the files
+	for _, file := range indexFile.Files {
+		response, err := http.Get(fmt.Sprintf("%s/web/%s", defaultCDNURL, file))
+		if err != nil {
+			return err
+		}
+		defer response.Body.Close()
+
+		content, err := io.ReadAll(response.Body)
+		if err != nil {
+			return err
+		}
+
+		err = os.WriteFile(filepath.Join(folderPath, file), content, 0644)
 		if err != nil {
 			return err
 		}
