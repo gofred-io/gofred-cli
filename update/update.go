@@ -14,6 +14,7 @@ import (
 
 const (
 	defaultCDNURL = "https://cdn.gofred.io"
+	binaryURL     = "https://github.com/gofred-io/gofred-cli/releases/download"
 )
 
 type IndexFile struct {
@@ -50,8 +51,8 @@ func CheckForUpdates(verbose bool) {
 	fmt.Println("Downloading gofred binary, this may take a while...")
 
 	binaryURL := fmt.Sprintf(
-		"%s/cli/%s/gofred-%s-%s",
-		defaultCDNURL,
+		"%s/v%s/gofred-%s-%s",
+		binaryURL,
 		indexFile.Version,
 		runtime.GOOS,
 		runtime.GOARCH,

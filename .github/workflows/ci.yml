@@ -102,32 +102,7 @@ jobs:
         if [ -d "dist" ]; then
           echo "Found dist directory with binaries:"
           ls -la dist/
-          
-          # Create tar.gz archives for each binary in the dist directory
-          for binary in dist/gofred-*; do
-            if [ -f "$binary" ]; then
-              filename=$(basename "$binary")
-              echo "Creating archive for: $filename"
-              tar -czf "dist/${filename}.tar.gz" -C dist "$filename"
-              echo "Created: dist/${filename}.tar.gz"
-              rm "$binary"
-            fi
-          done
-        
-          echo "Final dist files:"
-          ls -la dist/
-          find . -name "gofred-*.tar.gz" -type f
         fi
-    
-    - name: Check for release files
-      run: |
-        # Check for tar.gz files in dist directory
-        if [ ! -d "dist" ] || [ -z "$(ls -A dist/ 2>/dev/null)" ]; then
-          echo "No release files found in dist/"
-          exit 1
-        fi
-        echo "Release files found:"
-        ls -la dist/
     
     - name: Check GitHub permissions
       run: |
@@ -139,7 +114,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: dist/*.tar.gz
+        files: dist/gofred-*
         generate_release_notes: true
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
