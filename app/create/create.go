@@ -34,8 +34,7 @@ var (
 )
 
 func Init(parentCmd *cobra.Command) {
-	createCmd.Flags().StringVarP(&appPath, "path", "p", "", "Path to create the application")
-	createCmd.Flags().StringVarP(&pkgName, "package", "n", defaultPkgName, "Package name for the application")
+	createCmd.Flags().StringVarP(&pkgName, "package", "p", defaultPkgName, "Package name for the application")
 	parentCmd.AddCommand(createCmd)
 }
 
@@ -43,6 +42,10 @@ func createApp(cmd *cobra.Command, args []string) {
 	var (
 		err error
 	)
+
+	if len(args) > 0 {
+		appPath = args[0]
+	}
 
 	if appPath == "" {
 		fmt.Println("Path is required")

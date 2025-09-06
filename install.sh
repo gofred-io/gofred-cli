@@ -74,11 +74,8 @@ if ! command -v jq &> /dev/null; then
     fi
 fi
 
-# Download the index.json file silently
-curl -L -s -o  $TEMP_DIR/gofred.index.json $CDN_URL/cli/index.json
-
-# Parse the index.json file
-VERSION=$(cat $TEMP_DIR/gofred.index.json | jq -r '.version')
+# Get version from the index.json file
+VERSION=$(curl -L -s $CDN_URL/cli/index.json | jq -r '.version')
 
 # Download the gofred archive 
 curl -L -o $TEMP_DIR/gofred-$OS.tar.gz $CDN_URL/cli/$VERSION/gofred-$OS.tar.gz

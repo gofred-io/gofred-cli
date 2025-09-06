@@ -46,16 +46,16 @@ gofred version
 Create a new Go WebAssembly application:
 
 ```bash
-gofred app create --path ./my-app --package my-app
+gofred app create my-app --package my-app
 ```
 
 **Options:**
-- `--path, -p`: Path where to create the application (required)
+- `path`: Path where to create the application (required, positional argument)
 - `--package, -n`: Package name for the application (default: "gofred-app")
 
 **Example:**
 ```bash
-gofred app create --path ./hello-world --package hello-world
+gofred app create hello-world --package hello-world
 ```
 
 This will create:
@@ -85,7 +85,7 @@ This will:
 gofred --help                    # Show help information
 gofred version                   # Show version information
 gofred update                    # Update to the latest version
-gofred app create [flags]        # Create a new application
+gofred app create <path> [flags] # Create a new application
 gofred app run                   # Run the application (must be in app directory)
 ```
 
@@ -95,7 +95,7 @@ gofred app run                   # Run the application (must be in app directory
 
 ## Development Workflow
 
-1. **Create your app**: `gofred app create --path ./my-app --package my-app`
+1. **Create your app**: `gofred app create my-app --package my-app`
 2. **Navigate to the directory**: `cd my-app`
 3. **Start development**: `gofred app run`
 4. **Edit your code**: Modify `main.go` or other `.go` files
@@ -163,7 +163,7 @@ func main() {
 If you're having network issues, you can run in offline mode:
 
 ```bash
-gofred app create --path ./my-app --package my-app --offline
+gofred app create my-app --package my-app --offline
 gofred app run --offline
 ```
 
