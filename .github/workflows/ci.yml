@@ -31,7 +31,6 @@ jobs:
     #     args: --timeout=5m
 
   build:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -84,23 +83,49 @@ jobs:
     - name: Download all artifacts
       uses: actions/download-artifact@v4
     
+    - name: Debug artifacts
+      run: |
+        echo "Current directory contents:"
+        ls -la
+        echo "Looking for gofred artifacts:"
+        find . -name "gofred-*" -type f
+    
     - name: Create release archives
       run: |
         mkdir -p dist
         for artifact in gofred-*; do
           if [ -f "$artifact" ]; then
             tar -czf "dist/${artifact}.tar.gz" "$artifact"
+            echo "Created: dist/${artifact}.tar.gz"
           fi
         done
+        ls -la dist/
+    
+    - name: Check for release files
+      run: |
+        if [ ! -d "dist" ] || [ -z "$(ls -A dist/ 2>/dev/null)" ]; then
+          echo "No release files found in dist/"
+          exit 1
+        fi
+        echo "Release files found:"
+        ls -la dist/
+    
+    - name: Check GitHub permissions
+      run: |
+        echo "GitHub token permissions:"
+        curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+             -H "Accept: application/vnd.github.v3+json" \
+             https://api.github.com/repos/${{ github.repository }}/releases
     
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: dist/*
+        files: dist/*.tar.gz
         generate_release_notes: true
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
         draft: false
         prerelease: ${{ contains(github.ref_name, 'alpha') || contains(github.ref_name, 'beta') || contains(github.ref_name, 'rc') }}
+        fail_on_unmatched_files: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
