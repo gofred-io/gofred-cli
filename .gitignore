@@ -1,35 +1,66 @@
-# IDEs
-.idea
-.vscode
-
-# Node
-node_modules
-
-# Yarn
-yarn.lock
-
-# Package Managers
-package-lock.json
-pnpm-lock.yaml
-bun.lockb
-
-# OS
-.DS_Store
-
-# Logs
-logs
-*.log
-
-# Build
-build
-dist
-
-# Web
-web
-
-# Test
-test
-
-# App
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 gofred
 gofred-*
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove the comment below to include it)
+# vendor/
+
+# Go workspace file
+go.work
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+/tmp/
+
+# Log files
+*.log
+
+# Build artifacts
+dist/
+build/
+web/main.wasm
+
+# Coverage reports
+coverage.out
+coverage.html
+
+# Test results
+test-results/
+
+# Node modules (if any)
+node_modules/
+
+# Editor directories and files
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
