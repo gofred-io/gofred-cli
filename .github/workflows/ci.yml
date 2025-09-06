@@ -36,17 +36,25 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         goos: [linux, windows, darwin]
         goarch: [amd64, arm64]
-        include:
-          - os: ubuntu-latest
-            goarch: amd64
+        exclude:
           - os: windows-latest
-            goarch: amd64
+            goarch: arm64
+          - os: windows-latest
+            goos: linux
+          - os: windows-latest
+            goos: darwin
           - os: macos-latest
-            goarch: amd64
+            goarch: arm64
+          - os: macos-latest
+            goos: linux
+          - os: macos-latest
+            goos: windows
           - os: ubuntu-latest
             goarch: arm64
-          - os: macos-latest
-            goarch: arm64
+          - os: ubuntu-latest
+            goos: windows
+          - os: ubuntu-latest
+            goos: darwin
     
     steps:
     - uses: actions/checkout@v4
