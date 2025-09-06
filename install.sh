@@ -2,11 +2,12 @@
 set -e
 
 CDN_URL="https://cdn.gofred.io"
+BINARY_URL="https://github.com/gofred-io/gofred-cli/releases/download"
 TEMP_DIR="/tmp"
 OUTPUT_DIR="$HOME/.local/bin"
 
-# Check env if gofred is already installed
-if [ -f "gofred" ]; then
+# Check if gofred is already exists in environment PATH
+if command -v gofred &> /dev/null; then
     echo "gofred is already installed. If you want to update it, run 'gofred update'"
     exit 0
 fi
@@ -78,7 +79,7 @@ fi
 VERSION=$(curl -L -s $CDN_URL/cli/index.json | jq -r '.version')
 
 # Download the gofred archive 
-curl -L -o $TEMP_DIR/gofred-$OS.tar.gz $CDN_URL/cli/$VERSION/gofred-$OS.tar.gz
+curl -L -o $TEMP_DIR/gofred-$OS.tar.gz $BINARY_URL/v$VERSION/gofred-$OS.tar.gz
 
 # Extract the gofred binary 
 tar -xf $TEMP_DIR/gofred-$OS.tar.gz -C $OUTPUT_DIR
