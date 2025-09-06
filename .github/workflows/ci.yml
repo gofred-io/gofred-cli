@@ -36,12 +36,16 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         goos: [linux, windows, darwin]
         goarch: [amd64, arm64]
-        exclude:
+        include:
+          - os: ubuntu-latest
+            goarch: amd64
           - os: windows-latest
+            goarch: amd64
+          - os: macos-latest
+            goarch: amd64
+          - os: ubuntu-latest
             goarch: arm64
           - os: macos-latest
-            goarch: arm64
-          - os: ubuntu-latest
             goarch: arm64
     
     steps:
