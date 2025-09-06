@@ -10,18 +10,17 @@ import (
 
 	. "github.com/dave/jennifer/jen"
 	"github.com/gofred-io/gofred-cli/embed"
+	"github.com/gofred-io/gofred-cli/flags"
 	"github.com/gofred-io/gofred-cli/utils"
 	"github.com/spf13/cobra"
 )
 
 const (
 	defaultPkgName = "gofred-app"
-	defaultCDNURL  = "https://cdn.gofred.io"
 )
 
 var (
 	appPath string
-	offline bool
 	pkgName string
 )
 
@@ -36,7 +35,6 @@ var (
 func Init(parentCmd *cobra.Command) {
 	createCmd.Flags().StringVarP(&appPath, "path", "p", "", "Path to create the application")
 	createCmd.Flags().StringVarP(&pkgName, "package", "n", defaultPkgName, "Package name for the application")
-	createCmd.Flags().BoolVarP(&offline, "offline", "o", false, "Create the application offline (without internet connection)")
 	parentCmd.AddCommand(createCmd)
 }
 
@@ -64,7 +62,7 @@ func createApp(cmd *cobra.Command, args []string) {
 		return
 	}
 
-	err = createWebFolder(offline)
+	err = createWebFolder()
 	if err != nil {
 		fmt.Printf("Failed to create web folder: %v\n", err)
 		return
@@ -138,7 +136,7 @@ func createMainFile() error {
 	return nil
 }
 
-func createWebFolder(offline bool) error {
+func createWebFolder() error {
 	var (
 		err error
 	)
@@ -152,7 +150,7 @@ func createWebFolder(offline bool) error {
 		}
 	}
 
-	if offline {
+	if flags.IsOffline() {
 		return createWebFolderOffline(folderPath)
 	}
 
@@ -188,6 +186,10 @@ func createWebFolderOffline(folderPath string) error {
 }
 
 func createWebFolderOnline(folderPath string) error {
+	var (
+		defaultCDNURL = os.Getenv("CDN_URL")
+	)
+
 	// Download index.json from the CDN
 	response, err := http.Get(fmt.Sprintf("%s/web/index.json", defaultCDNURL))
 	if err != nil {

@@ -2,16 +2,6 @@
 .idea
 .vscode
 
-# Go
-.env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-.env.development
-.env.test
-.env.production
-
 # Node
 node_modules
 
@@ -42,3 +32,4 @@ test
 
 # App
 gofred
+gofred-*
