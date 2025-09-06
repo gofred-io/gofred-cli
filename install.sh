@@ -79,16 +79,16 @@ fi
 VERSION=$(curl -L -s $CDN_URL/cli/index.json | jq -r '.version')
 
 # Download the gofred archive 
-curl -L -o $TEMP_DIR/gofred-$OS.tar.gz $BINARY_URL/v$VERSION/gofred-$OS.tar.gz
+curl -L -o $TEMP_DIR/gofred-$OS.tar.gz $BINARY_URL/v$VERSION/gofred-$OS
 
 # Extract the gofred binary 
-tar -xf $TEMP_DIR/gofred-$OS.tar.gz -C $OUTPUT_DIR
+# tar -xf $TEMP_DIR/gofred-$OS.tar.gz -C $OUTPUT_DIR
 
 # Rename the binary to gofred
 mv $OUTPUT_DIR/gofred-$OS $OUTPUT_DIR/gofred
 
 # Remove the archive
-rm $TEMP_DIR/gofred-$OS.tar.gz
+# rm $TEMP_DIR/gofred-$OS.tar.gz
 
 # Make the file executable if OS is not Windows
 if [ $OS != "windows-arm64" ] && [ $OS != "windows-amd64" ]; then
