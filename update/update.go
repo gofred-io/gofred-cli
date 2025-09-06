@@ -12,16 +12,16 @@ import (
 	"github.com/gofred-io/gofred-cli/flags"
 )
 
-const (
-	defaultCDNURL = "https://cdn.gofred.io"
-	binaryURL     = "https://github.com/gofred-io/gofred-cli/releases/download"
-)
-
 type IndexFile struct {
 	Version string `json:"version"`
 }
 
 func CheckForUpdates(verbose bool) {
+	var (
+		defaultCDNURL = flags.DefaultCDNURL()
+		binaryBaseURL = flags.BinaryURL()
+	)
+
 	if flags.IsOffline() {
 		return
 	}
@@ -52,7 +52,7 @@ func CheckForUpdates(verbose bool) {
 
 	binaryURL := fmt.Sprintf(
 		"%s/v%s/gofred-%s-%s",
-		binaryURL,
+		binaryBaseURL,
 		indexFile.Version,
 		runtime.GOOS,
 		runtime.GOARCH,

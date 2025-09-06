@@ -193,7 +193,7 @@ func createWebFolderOffline(folderPath string) error {
 
 func createWebFolderOnline(folderPath string) error {
 	var (
-		defaultCDNURL = os.Getenv("CDN_URL")
+		defaultCDNURL = flags.DefaultCDNURL()
 	)
 
 	// Download index.json from the CDN
