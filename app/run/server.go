@@ -63,8 +63,6 @@ func runServer() {
 
 	printSuccessMessage()
 
-	openURL(localURL)
-
 	rootDir := "./web"
 	log.Fatal(http.Serve(addr, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// if the file is not found, serve the index.html file
@@ -129,7 +127,7 @@ func runWebsockerServer() {
 	http.Serve(addr, nil)
 }
 
-func handleChange() {
+func handleChange(starting bool) {
 	removeLines(linesToRemove)
 	printCompilingMessage()
 	err := build()
@@ -139,6 +137,9 @@ func handleChange() {
 		printErrorMessage(err)
 	} else {
 		printSuccessMessage()
+		if starting {
+			openURL(localURL)
+		}
 		chReload <- struct{}{}
 	}
 }
@@ -168,7 +169,7 @@ func watch() {
 			}
 
 			if !initial {
-				handleChange()
+				handleChange(false)
 			}
 
 			watchFiles[path] = true
@@ -181,7 +182,7 @@ func watch() {
 	}
 
 	walkdir(true)
-	handleChange()
+	handleChange(true)
 
 	ticker := time.NewTicker(500 * time.Millisecond)
 	defer ticker.Stop()
@@ -207,7 +208,7 @@ func watch() {
 			log.Printf("error: %v", err)
 		case <-ticker.C:
 			if hasChanged.CompareAndSwap(true, false) {
-				handleChange()
+				handleChange(false)
 			}
 		case <-ticker2.C:
 			walkdir(false)
