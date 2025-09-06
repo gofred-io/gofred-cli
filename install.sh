@@ -84,4 +84,4 @@ echo "gofred version: $(gofred version)"
 
 # Print success message
 echo "gofred installed successfully"
-echo "Run `gofred` to get started"
+echo "Run 'gofred --help' to get started"
