@@ -44,13 +44,9 @@ jobs:
           - os: windows-latest
             goos: darwin
           - os: macos-latest
-            goarch: arm64
-          - os: macos-latest
             goos: linux
           - os: macos-latest
             goos: windows
-          - os: ubuntu-latest
-            goarch: arm64
           - os: ubuntu-latest
             goos: windows
           - os: ubuntu-latest
