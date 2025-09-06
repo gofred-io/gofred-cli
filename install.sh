@@ -79,13 +79,13 @@ fi
 VERSION=$(curl -L -s $CDN_URL/cli/index.json | jq -r '.version')
 
 # Download the gofred archive 
-curl -L -o $TEMP_DIR/gofred-$OS.tar.gz $BINARY_URL/v$VERSION/gofred-$OS
+curl -L -o $OUTPUT_DIR/gofred $BINARY_URL/v$VERSION/gofred-$OS
 
 # Extract the gofred binary 
 # tar -xf $TEMP_DIR/gofred-$OS.tar.gz -C $OUTPUT_DIR
 
 # Rename the binary to gofred
-mv $OUTPUT_DIR/gofred-$OS $OUTPUT_DIR/gofred
+# mv $OUTPUT_DIR/gofred-$OS $OUTPUT_DIR/gofred
 
 # Remove the archive
 # rm $TEMP_DIR/gofred-$OS.tar.gz
