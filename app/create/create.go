@@ -46,6 +46,7 @@ func createApp(cmd *cobra.Command, args []string) {
 
 	if appPath == "" {
 		fmt.Println("Path is required")
+		cmd.Usage()
 		return
 	}
 
