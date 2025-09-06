@@ -11,6 +11,7 @@ import (
 	. "github.com/dave/jennifer/jen"
 	"github.com/gofred-io/gofred-cli/embed"
 	"github.com/gofred-io/gofred-cli/flags"
+	"github.com/gofred-io/gofred-cli/update"
 	"github.com/gofred-io/gofred-cli/utils"
 	"github.com/spf13/cobra"
 )
@@ -48,6 +49,7 @@ func createApp(cmd *cobra.Command, args []string) {
 		return
 	}
 
+	update.CheckForUpdates(false)
 	fmt.Printf("Creating application in %s\n", appPath)
 
 	err = createVsCodeWorkspace()

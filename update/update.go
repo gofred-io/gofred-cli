@@ -1,4 +1,4 @@
-package main
+package update
 
 import (
 	"encoding/json"
@@ -16,7 +16,7 @@ type IndexFile struct {
 	Version string `json:"version"`
 }
 
-func checkForUpdates() {
+func CheckForUpdates(verbose bool) {
 	var (
 		defaultCDNURL = os.Getenv("CDN_URL")
 	)
@@ -24,8 +24,6 @@ func checkForUpdates() {
 	if flags.IsOffline() {
 		return
 	}
-
-	fmt.Println("Checking for updates...")
 
 	// Download index.json from the CDN
 	response, err := http.Get(fmt.Sprintf("%s/cli/index.json", defaultCDNURL))
@@ -41,12 +39,15 @@ func checkForUpdates() {
 	}
 
 	if indexFile.Version == flags.Version {
+		if verbose {
+			fmt.Println("You already have the latest version")
+		}
 		return
 	}
 
 	// Download the gofred binary from the CDN
+	fmt.Printf("Found new version, updating to version %s...\n", indexFile.Version)
 	fmt.Println("Downloading gofred binary, this may take a while...")
-	fmt.Printf("Updating to version %s\n", indexFile.Version)
 
 	binaryURL := fmt.Sprintf(
 		"%s/cli/%s/gofred-%s-%s",
@@ -71,6 +72,6 @@ func checkForUpdates() {
 		log.Fatalf("Error applying update: %v", err)
 	}
 
-	fmt.Println("Updates applied, please run `gofred` again")
+	fmt.Println("Updates applied, please run `gofred` again to start the application")
 	os.Exit(0)
 }
