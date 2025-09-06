@@ -31,28 +31,8 @@ jobs:
     #     args: --timeout=5m
 
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm64]
-        exclude:
-          - os: windows-latest
-            goarch: arm64
-          - os: windows-latest
-            goos: linux
-          - os: windows-latest
-            goos: darwin
-          - os: macos-latest
-            goos: linux
-          - os: macos-latest
-            goos: windows
-          - os: ubuntu-latest
-            goos: windows
-          - os: ubuntu-latest
-            goos: darwin
     
     steps:
     - uses: actions/checkout@v4
@@ -62,16 +42,37 @@ jobs:
       with:
         go-version: '1.25.1'
     
-    - name: Build
+    - name: Build for all platforms
       run: |
-        GOOS=${{ matrix.goos }} GOARCH=${{ matrix.goarch }} go build -o gofred-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }} .
-      shell: bash
+        # Create dist directory
+        mkdir -p dist
+        
+        # Build for Linux AMD64
+        GOOS=linux GOARCH=amd64 go build -o dist/gofred-linux-amd64 .
+        
+        # Build for Linux ARM64
+        GOOS=linux GOARCH=arm64 go build -o dist/gofred-linux-arm64 .
+        
+        # Build for Windows AMD64
+        GOOS=windows GOARCH=amd64 go build -o dist/gofred-windows-amd64.exe .
+        
+        # Build for Windows ARM64
+        GOOS=windows GOARCH=arm64 go build -o dist/gofred-windows-arm64.exe .
+        
+        # Build for macOS AMD64
+        GOOS=darwin GOARCH=amd64 go build -o dist/gofred-darwin-amd64 .
+        
+        # Build for macOS ARM64
+        GOOS=darwin GOARCH=arm64 go build -o dist/gofred-darwin-arm64 .
+        
+        # List all built binaries
+        ls -la dist/
     
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: gofred-${{ matrix.goos }}-${{ matrix.goarch }}
-        path: gofred-${{ matrix.goos }}-${{ matrix.goarch }}${{ matrix.goos == 'windows' && '.exe' || '' }}
+        name: gofred-binaries
+        path: dist/
 
   release:
     needs: [test, build]
@@ -90,48 +91,50 @@ jobs:
         ls -la
         echo "Looking for gofred artifacts:"
         find . -name "gofred-*" -type f
-        echo "Artifact directories:"
-        find . -name "gofred-*" -type d
     
     - name: Create release archives
       run: |
-        mkdir -p dist
         echo "Processing artifacts..."
         
-        # Process files directly in current directory
-        for artifact in gofred-*; do
-          if [ -f "$artifact" ]; then
-            echo "Found file: $artifact"
-            tar -czf "dist/${artifact}.tar.gz" "$artifact"
-            echo "Created: dist/${artifact}.tar.gz"
-          fi
-        done
-        
-        # Process artifacts in subdirectories (downloaded artifacts)
-        for dir in gofred-*; do
-          if [ -d "$dir" ]; then
-            echo "Found directory: $dir"
-            # Find the binary inside the directory
-            binary=$(find "$dir" -name "gofred-*" -type f | head -1)
-            if [ -n "$binary" ]; then
-              echo "Found binary: $binary"
-              tar -czf "dist/${dir}.tar.gz" -C "$dir" .
-              echo "Created: dist/${dir}.tar.gz"
+        # The artifacts are already in dist/ from the build job
+        if [ -d "dist" ]; then
+          echo "Found dist directory with binaries:"
+          ls -la dist/
+          
+          # Create tar.gz archives for each binary
+          cd dist
+          for binary in gofred-*; do
+            if [ -f "$binary" ]; then
+              echo "Creating archive for: $binary"
+              tar -czf "${binary}.tar.gz" "$binary"
+              echo "Created: ${binary}.tar.gz"
             fi
-          fi
-        done
+          done
+          cd ..
+        else
+          echo "No dist directory found, checking for individual artifacts..."
+          # Fallback: look for individual artifact files
+          for artifact in gofred-*; do
+            if [ -f "$artifact" ]; then
+              echo "Found file: $artifact"
+              tar -czf "${artifact}.tar.gz" "$artifact"
+              echo "Created: ${artifact}.tar.gz"
+            fi
+          done
+        fi
         
-        echo "Final dist contents:"
-        ls -la dist/
+        echo "Final release files:"
+        find . -name "gofred-*.tar.gz" -type f
     
     - name: Check for release files
       run: |
-        if [ ! -d "dist" ] || [ -z "$(ls -A dist/ 2>/dev/null)" ]; then
-          echo "No release files found in dist/"
+        # Check for tar.gz files in current directory
+        if [ -z "$(find . -name "gofred-*.tar.gz" -type f)" ]; then
+          echo "No release files found"
           exit 1
         fi
         echo "Release files found:"
-        ls -la dist/
+        find . -name "gofred-*.tar.gz" -type f
     
     - name: Check GitHub permissions
       run: |
@@ -143,7 +146,7 @@ jobs:
     - name: Create Release
       uses: softprops/action-gh-release@v1
       with:
-        files: dist/*.tar.gz
+        files: gofred-*.tar.gz
         generate_release_notes: true
         tag_name: ${{ github.ref_name }}
         name: Release ${{ github.ref_name }}
