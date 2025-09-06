@@ -32,6 +32,7 @@ jobs:
 
   build:
     runs-on: ${{ matrix.os }}
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
@@ -89,16 +90,38 @@ jobs:
         ls -la
         echo "Looking for gofred artifacts:"
         find . -name "gofred-*" -type f
+        echo "Artifact directories:"
+        find . -name "gofred-*" -type d
     
     - name: Create release archives
       run: |
         mkdir -p dist
+        echo "Processing artifacts..."
+        
+        # Process files directly in current directory
         for artifact in gofred-*; do
           if [ -f "$artifact" ]; then
+            echo "Found file: $artifact"
             tar -czf "dist/${artifact}.tar.gz" "$artifact"
             echo "Created: dist/${artifact}.tar.gz"
           fi
         done
+        
+        # Process artifacts in subdirectories (downloaded artifacts)
+        for dir in gofred-*; do
+          if [ -d "$dir" ]; then
+            echo "Found directory: $dir"
+            # Find the binary inside the directory
+            binary=$(find "$dir" -name "gofred-*" -type f | head -1)
+            if [ -n "$binary" ]; then
+              echo "Found binary: $binary"
+              tar -czf "dist/${dir}.tar.gz" -C "$dir" .
+              echo "Created: dist/${dir}.tar.gz"
+            fi
+          fi
+        done
+        
+        echo "Final dist contents:"
         ls -la dist/
     
     - name: Check for release files
