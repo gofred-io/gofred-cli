@@ -10,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"sync/atomic"
@@ -300,14 +301,23 @@ func removeLines(n int) {
 
 func writeEnvJS(port int) {
 	var (
-		content = strings.Builder{}
+		content []byte
+		err     error
 	)
 
-	content.WriteString("window.env = {\n")
-	content.WriteString(fmt.Sprintf("\tLIVE_PORT: %d\n", port))
-	content.WriteString("}\n")
+	// Read the env.js file
+	content, err = os.ReadFile("web/env.js")
+	if err != nil {
+		log.Fatalf("error reading web/env.js: %v", err)
+	}
 
-	err := os.WriteFile("web/env.js", []byte(content.String()), 0644)
+	contentString := string(content)
+
+	// Replace LIVE_PORT with regex
+	re := regexp.MustCompile(`LIVE_PORT: \d+`)
+	contentString = re.ReplaceAllString(contentString, fmt.Sprintf("LIVE_PORT: %d", port))
+
+	err = os.WriteFile("web/env.js", []byte(contentString), 0644)
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
